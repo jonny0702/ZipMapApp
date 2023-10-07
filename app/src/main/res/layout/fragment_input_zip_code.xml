@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".InputZipCode">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/Zip_codeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Zip Code App"
+            android:textSize="20dp"
+            android:textFontWeight="500"
+            android:textColor="#000"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center"
+            />
+        <EditText
+            android:id="@+id/Zip_code"
+            android:layout_width="350dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:padding="8dp"
+            android:hint="Introduce the postal code"/>
+        <Button
+            android:id="@+id/Zip_code_buttonSend"
+            android:layout_width="250dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="@drawable/button_home"
+            android:layout_marginTop="10dp"
+            android:text="Process"
+            android:textColor="#FFFF"
+            />
+    </LinearLayout>
+
+</LinearLayout>
