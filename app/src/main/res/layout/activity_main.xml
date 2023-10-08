@@ -5,12 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-<androidx.fragment.app.FragmentContainerView
-    android:id="@+id/mapFragment"
+
+    <androidx.fragment.app.FragmentContainerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/input_fragment_container"
+        android:translationZ="10dp"
+        />
+ <RelativeLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    tools:context="com.example.zipmap.MainActivity"
-    />
+    android:layout_height="match_parent">
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.example.zipmap.MainActivity"
+         />
+
+</RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
