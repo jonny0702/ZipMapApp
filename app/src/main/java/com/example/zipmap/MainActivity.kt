@@ -1,11 +1,16 @@
 package com.example.zipmap
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.add
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.View
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.commit
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -24,6 +29,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mapFragment: SupportMapFragment
     private lateinit var mMap: GoogleMap
+    private lateinit var inputFragment: InputZipCode
+    val fragmentTransaction = supportFragmentManager.beginTransaction()
 
     //    private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -33,10 +40,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_main)
 
         mapFragment =
-            supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
+        supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        supportFragmentManager.commit {
+            add<InputZipCode>(R.id.input_fragment_container)
+        }
 
     }
 
