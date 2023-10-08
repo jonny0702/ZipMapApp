@@ -1,6 +1,7 @@
 package com.example.zipmap
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.commit
 import androidx.fragment.app.add
+import com.example.zipmap.helpers.ArSessionHelper
 import com.example.zipmap.helpers.GeoPermissionsHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -25,15 +27,20 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
+import com.google.ar.core.exceptions.CameraNotAvailableException
+import com.google.ar.core.exceptions.UnavailableApkTooOldException
+import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException
+import com.google.ar.core.exceptions.UnavailableSdkTooOldException
+import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 
-//AR
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener{
+class MainActivity : AppCompatActivity(){
 
     companion object{
         private const val LOCATION_REQUEST_CODE = 100
     }
     lateinit var arCoreSessionHelper: GeoPermissionsHelper
+    lateinit var activity: Activity
     lateinit var mapFragment: SupportMapFragment
     lateinit var mMap: GoogleMap
     private lateinit var lastLocation: Location
@@ -50,15 +57,32 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     }
 
-    override fun onMapReady(googleMap: GoogleMap){
+/** override fun onMapReady(googleMap: GoogleMap){
         mMap = googleMap
 
        mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setOnMarkerClickListener(this)
         setUpMap()
-    }
+    }  */
 
 
+   /** private fun setUpMap(){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+          != PackageManager.PERMISSION_GRANTED ){
+        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),LOCATION_REQUEST_CODE)
+       return
+        }
+            mMap.isMyLocationEnabled = true
+            fusedLocationClient.lastLocation.addOnSuccessListener(this) {location ->
+                if(location != null){
+                    lastLocation = location
+                    val currentLatLong = LatLng(location.latitude, location.longitude)
+                    placeMarkerOnMap(currentLatLong)
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 20f))
+                }
+            }
+
+    }*/
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -76,6 +100,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     fun createSession(session: Session){
+        Log.e("confirm Session: ", session.toString())
         //Createing a new ArCore Session
         session.config.apply {
             // Enable Geospatial Mode
@@ -83,27 +108,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         }
     }
 
-    private fun setUpMap(){
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED ){
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),LOCATION_REQUEST_CODE)
-            return
-        }
-        mMap.isMyLocationEnabled = true
-        fusedLocationClient.lastLocation.addOnSuccessListener(this) {location ->
-            if(location != null){
-                lastLocation = location
-                val currentLatLong = LatLng(location.latitude, location.longitude)
-                placeMarkerOnMap(currentLatLong)
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 20f))
-            }
-        }
-    }
-    private fun placeMarkerOnMap(currentLatLong: LatLng){
+
+   /** private fun placeMarkerOnMap(currentLatLong: LatLng){
         val markerOptions = MarkerOptions().position(currentLatLong)
         markerOptions.title("$currentLatLong")
         mMap.addMarker(markerOptions)
-    }
+    }*/
 
     override fun onMarkerClick(p0: Marker) = true
 
