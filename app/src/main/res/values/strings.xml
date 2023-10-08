@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">ZipMap</string>
     <string name="marker_title">Maker in PANAMA</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ButtonImage">this_button_is_to_send_zip_Code</string>
+    <string name="zipPlaceHolder">EX: 11872ab3B</string>
 </resources>
