@@ -6,9 +6,12 @@ import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.commit
 import androidx.fragment.app.add
+import com.example.zipmap.helpers.GeoPermissionsHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -19,13 +22,18 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.ar.core.ArCoreApk
+import com.google.ar.core.Config
+import com.google.ar.core.Session
+
+//AR
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener{
 
     companion object{
         private const val LOCATION_REQUEST_CODE = 100
     }
-
+    lateinit var arCoreSessionHelper: GeoPermissionsHelper
     lateinit var mapFragment: SupportMapFragment
     lateinit var mMap: GoogleMap
     private lateinit var lastLocation: Location
@@ -41,12 +49,38 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
     }
+
     override fun onMapReady(googleMap: GoogleMap){
         mMap = googleMap
 
        mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setOnMarkerClickListener(this)
         setUpMap()
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (!GeoPermissionsHelper.hasGeoPermissions(this)){
+            Toast.makeText(this, "Camera and location permissions are needed to run this application", Toast.LENGTH_LONG)
+                .show()
+        }
+        if(!GeoPermissionsHelper.shouldShowRequestPermissionRationale(this)){
+            GeoPermissionsHelper.launchPermissionSettings(this)
+        }
+        finish()
+    }
+
+    fun createSession(session: Session){
+        //Createing a new ArCore Session
+        session.config.apply {
+            // Enable Geospatial Mode
+            geospatialMode = Config.GeospatialMode.ENABLED
+        }
     }
 
     private fun setUpMap(){
