@@ -1,5 +1,7 @@
 package com.example.zipmap
 
+import android.content.Context
+import android.content.Intent
 import android.media.Image
 import android.os.Bundle
 import android.util.Log
@@ -11,25 +13,26 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.core.widget.addTextChangedListener
-import org.chromium.net.CronetEngine
+import com.example.zipmap.client.network.ZipMapHttpClient
 
 
 class InputZipCode : Fragment(), View.OnClickListener {
+
     private var zipCode: String? = null
+    lateinit var handleClick: handleClickFragment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             zipCode = it.getString(ZIP_CODE_BUNDLE)
         }
+
     }
     var zipInfo: String = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        val myBuilder = CronetEngine.Builder(context)
-        val cronetEngine: CronetEngine = myBuilder.build()
 
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_input_zip_code, container, false)
@@ -48,8 +51,6 @@ class InputZipCode : Fragment(), View.OnClickListener {
     }
 
 
-
-
     companion object {
         private const val ZIP_CODE_BUNDLE = "507"
         @JvmStatic
@@ -61,11 +62,12 @@ class InputZipCode : Fragment(), View.OnClickListener {
             }
     }
 
+
     override fun onClick(v: View?){
         when(v?.id){
             R.id.send_button -> {
+                handleClick.pushOnSendButton(zipInfo)
                // post send Fetch
-
                 Log.w("Zip_res: ", zipInfo)
             }else ->{
 
@@ -73,4 +75,18 @@ class InputZipCode : Fragment(), View.OnClickListener {
         }
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        try{
+            handleClick=context as handleClickFragment
+            Log.i("isAttach", "works")
+        }catch (e: Exception){
+            Log.d("Exception Attach", e.message.toString())
+        }
+    }
+
+}
+
+interface handleClickFragment {
+     fun pushOnSendButton(zipCode: String)
 }

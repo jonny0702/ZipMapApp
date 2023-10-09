@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.commit
+import com.example.zipmap.client.network.ZipMapHttpClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -18,8 +19,12 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, handleClickFragment {
 
     private var locationPermissionGranted = false
     private var lastKnownLocation: Location? = null
@@ -28,6 +33,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var inputFragment: InputZipCode
+    private var fragmentInfoInputZip: String = ""
+    private lateinit var clientHttpZipMap: ZipMapHttpClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +46,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
+
         supportFragmentManager.commit {
             add<InputZipCode>(R.id.input_fragment_container)
         }
+
 
     }
 
@@ -151,9 +160,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         updateLocationUI()
     }
 
+
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val DEFAULT_ZOOM = 15
         private const val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+    }
+
+    override fun pushOnSendButton(zipCode: String) {
+        fragmentInfoInputZip = zipCode
+        Log.i("zip_code_act", zipCode)
     }
 }
