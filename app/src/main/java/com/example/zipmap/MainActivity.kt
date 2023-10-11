@@ -28,6 +28,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, ClickToSendValueFragment {
 
+
     companion object {
         private const val LOCATION_REQUEST_CODE = 100
         const val BASE_URL = "http://192.168.0.13:8000/"
@@ -43,6 +44,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, ClickToSendValueFr
     //    private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private var locationPermissionGranted = false
+    private var lastKnownLocation: Location? = null
+    private val defaultLocation = LatLng(9.04, -79.48)
+    private lateinit var mapFragment: SupportMapFragment
+    private lateinit var mMap: GoogleMap
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var inputFragment: InputZipCode
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -51,7 +61,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, ClickToSendValueFr
         supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         supportFragmentManager.commit {
             add<InputZipCode>(R.id.input_fragment_container)
@@ -61,49 +71,88 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, ClickToSendValueFr
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-//        mMap.uiSettings.isZoomControlsEnabled = false
-//        mMap.setOnMarkerClickListener(this)
-//        setUpMap()
-
-        val panama = LatLng(9.04, -79.48)
-        val markerText: String = getString(R.string.marker_title)
-
-        mMap.addMarker(
-            MarkerOptions().position(panama).title(markerText)
-        )
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(panama))
+        updateLocationUI()
+        getDeviceLocation()
     }
 
-    private fun setUpMap() {
+    private fun getLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_REQUEST_CODE
+                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
             )
             return
         }
-        mMap.isMyLocationEnabled = true
-//        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
-//            if (location != null) {
-//                lastLocation = location
-//                val currentLatLong = LatLng(location.latitude, location.longitude)
-//                placeMarkerOnMap(currentLatLong)
-//                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 20f))
-//            }
-//        }
-    }
-    
 
-//    private fun placeMarkerOnMap(currentLatLong: LatLng) {
-//        val markerOptions = MarkerOptions().position(currentLatLong)
-//        markerOptions.title("$currentLatLong")
-//        mMap.addMarker(markerOptions)
-//    }
+        locationPermissionGranted = true
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun updateLocationUI() {
+        if (mMap == null) {
+            return
+        }
+        try {
+            if (locationPermissionGranted) {
+                mMap.isMyLocationEnabled = true
+                mMap.uiSettings?.isMyLocationButtonEnabled = true
+            } else {
+                mMap.isMyLocationEnabled = false
+                mMap.uiSettings?.isMyLocationButtonEnabled = false
+                lastKnownLocation = null
+                getLocationPermission()
+            }
+        } catch (e: SecurityException) {
+            Log.e("Exception: %s", e.message, e)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getDeviceLocation() {
+        try {
+            if (locationPermissionGranted) {
+                val locationResult = fusedLocationProviderClient.lastLocation
+                locationResult.addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        lastKnownLocation = task.result
+
+                        if (lastKnownLocation != null) {
+                            var currentLocation = LatLng(
+                                lastKnownLocation!!.latitude,
+                                lastKnownLocation!!.longitude
+                            )
+
+                            mMap?.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    currentLocation, DEFAULT_ZOOM.toFloat()
+                                )
+                            )
+
+                            val markerText = getString(R.string.marker_title)
+
+                            mMap.addMarker(
+                                MarkerOptions().position((currentLocation))
+                                    .title(markerText)
+                            )
+                        }
+                    } else {
+                        Log.d(TAG, "Current location is null. Using defaults.")
+                        Log.e(TAG, "Exception: %s", task.exception)
+                        mMap?.moveCamera(
+                            CameraUpdateFactory
+                                .newLatLngZoom(defaultLocation, DEFAULT_ZOOM.toFloat())
+                        )
+                        mMap?.uiSettings?.isMyLocationButtonEnabled = false
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            Log.e("Exception: %s", e.message, e)
+        }
+    }
 
 //    override fun onMarkerClick(p0: Marker) = true
     override fun pushToSendToActivity (value: String){
@@ -128,9 +177,32 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, ClickToSendValueFr
             .client(getClient())
                 .build()
     }**/
-    private fun getClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(HeaderInterceptor())
-            .build()
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
+
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    locationPermissionGranted = true
+                }
+            }
+
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+
+        updateLocationUI()
+    }
+
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
+        private const val DEFAULT_ZOOM = 15
+        private const val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+
     }
 }

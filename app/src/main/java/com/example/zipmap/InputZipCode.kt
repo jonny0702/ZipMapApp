@@ -1,5 +1,6 @@
 package com.example.zipmap
 
+
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -19,7 +20,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 
+
+
+
 class InputZipCode : Fragment() {
+
     private var zipCode: String? = null
     private lateinit var postalCode: ZipDto
     private lateinit var clickToSendValueFragment: ClickToSendValueFragment
@@ -31,11 +36,15 @@ class InputZipCode : Fragment() {
         }
         retrofit = getRetrofitFrag()
     }
-
+    var zipInfo: String = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        val myBuilder = CronetEngine.Builder(context)
+        val cronetEngine: CronetEngine = myBuilder.build()
+
         // Inflate the layout for this fragment
         val view =  inflater.inflate(R.layout.fragment_input_zip_code, container, false)
 
@@ -92,8 +101,11 @@ class InputZipCode : Fragment() {
         return Retrofit.Builder()
             .baseUrl(MainActivity.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .build()
+            .build() 
     }
+
+
+
 
     companion object {
         private const val ZIP_CODE_BUNDLE = "507"
@@ -107,8 +119,10 @@ class InputZipCode : Fragment() {
     }
 
 
+
 }
 
 interface ClickToSendValueFragment{
     fun pushToSendToActivity(value: String)
+
 }
