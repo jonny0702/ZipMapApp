@@ -12,7 +12,12 @@ import android.widget.EditText
 import android.widget.ImageButton
 import androidx.core.widget.addTextChangedListener
 import com.example.zipmap.ApiService.ApiClient
+import com.example.zipmap.ApiService.ZipCodeDao
 import com.example.zipmap.ApiService.ZipDto
+import com.example.zipmap.helper.MapView
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,9 +31,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 class InputZipCode : Fragment() {
 
     private var zipCode: String? = null
-    private lateinit var postalCode: ZipDto
+//    private  val responseObj: ZipCodeDao? = null
+//    private lateinit var postalCode: ZipDto
     private lateinit var clickToSendValueFragment: ClickToSendValueFragment
     private lateinit var retrofit: Retrofit
+    private var isClicked = false
+
+    private var mapView: MapView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -36,14 +45,12 @@ class InputZipCode : Fragment() {
         }
         retrofit = getRetrofitFrag()
     }
-    var zipInfo: String = ""
+//    var zipInfo: String = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
-        val myBuilder = CronetEngine.Builder(context)
-        val cronetEngine: CronetEngine = myBuilder.build()
 
         // Inflate the layout for this fragment
         val view =  inflater.inflate(R.layout.fragment_input_zip_code, container, false)
@@ -55,10 +62,11 @@ class InputZipCode : Fragment() {
             text -> zipCode = text.toString()
         }
         btn.setOnClickListener { v ->
+            //TODO(): implement later
             when (v?.id) {
                 R.id.send_button -> {
-                    clickToSendValueFragment.pushToSendToActivity(zipCode.orEmpty())
                     if(zipCode != null){
+                        isClicked = true
                         searchLocationByZipCode(ZipDto(zipCode.orEmpty()))
                     }
                     Log.w("Zip_res: ", zipCode.toString())
@@ -78,9 +86,16 @@ class InputZipCode : Fragment() {
         CoroutineScope(Dispatchers.IO).launch {
             Log.i("zipCode", postalCode.toString())
             val responseApi = retrofit.create(ApiClient::class.java).getLocationZip(postalCode)
-            Log.i("response.body", responseApi.toString())
+
             if(responseApi.isSuccessful && responseApi.body() != null){
                 Log.i("response.body", responseApi.body().toString())
+                val markerOptions = MarkerOptions().position(
+                    LatLng(
+                    responseApi.body()!!.latitude, responseApi.body()!!.longitude
+                )
+                )
+                mapView?.googleMap?.addMarker(markerOptions)
+                clickToSendValueFragment.pushToSendToActivity(responseApi.body()!!, isClicked)
             }else{
                 Log.i("response.body", "NotWorks")
             }
@@ -106,9 +121,9 @@ class InputZipCode : Fragment() {
 
 
 
-
     companion object {
         private const val ZIP_CODE_BUNDLE = "507"
+
         @JvmStatic
         fun newInstance(zipCode: String) =
             InputZipCode().apply {
@@ -119,10 +134,9 @@ class InputZipCode : Fragment() {
     }
 
 
-
 }
 
 interface ClickToSendValueFragment{
-    fun pushToSendToActivity(value: String)
+    fun pushToSendToActivity(value: ZipCodeDao, isClicked: Boolean)
 
 }
