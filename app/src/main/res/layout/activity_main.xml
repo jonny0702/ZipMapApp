@@ -12,9 +12,12 @@
         android:id="@+id/input_fragment_container"
         android:translationZ="10dp"
         />
- <RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    <com.example.zipmap.helper.MapTouchWrapper
+        android:id="@+id/map_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        tools:ignore="MissingConstraints">
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -23,6 +26,6 @@
         tools:context="com.example.zipmap.MainActivity"
          />
 
-</RelativeLayout>
+    </com.example.zipmap.helper.MapTouchWrapper>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
