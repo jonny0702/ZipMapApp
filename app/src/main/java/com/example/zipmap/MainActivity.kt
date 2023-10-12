@@ -1,29 +1,17 @@
 package com.example.zipmap
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.add
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.commit
 import com.example.zipmap.ApiService.ZipCodeDao
-import com.example.zipmap.helper.MapView
 import com.example.zipmap.helper.MapViewHelper
 
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 
 import retrofit2.Retrofit
 
@@ -39,14 +27,10 @@ class MainActivity() : AppCompatActivity(), ClickToSendValueFragment, GoogleMap.
      var lastLocation: Location? = null
      lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
-
-//    private var locationPermissionGranted = false
-//    private var lastKnownLocation: Location? = null
-    private val defaultLocation = LatLng(9.04, -79.48)
+//    private val defaultLocation = LatLng(9.04, -79.48)
 
     //State Listener
     private var clickedStateButton = false
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,14 +45,15 @@ class MainActivity() : AppCompatActivity(), ClickToSendValueFragment, GoogleMap.
         (view.root)
 
         supportFragmentManager.commit {
-            add<InputZipCode>(R.id.input_fragment_container)
+            inputFragment = InputZipCode()
+            add(R.id.input_fragment_container, inputFragment)
+            setReorderingAllowed(true)
         }
 
     }
 
 
     override fun pushToSendToActivity (value: ZipCodeDao, isClicked: Boolean){
-
         clickedStateButton = isClicked
         Log.i("click Status", clickedStateButton.toString())
 

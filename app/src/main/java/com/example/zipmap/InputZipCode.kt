@@ -3,6 +3,7 @@ package com.example.zipmap
 
 import android.content.Context
 import android.os.Bundle
+import android.renderscript.Sampler
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,6 +16,8 @@ import com.example.zipmap.ApiService.ApiClient
 import com.example.zipmap.ApiService.ZipCodeDao
 import com.example.zipmap.ApiService.ZipDto
 import com.example.zipmap.helper.MapView
+import com.example.zipmap.helper.MapViewHelper
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -28,24 +31,20 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 
-class InputZipCode : Fragment() {
+class InputZipCode(
+) : Fragment() {
 
     private var zipCode: String? = null
-//    private  val responseObj: ZipCodeDao? = null
-//    private lateinit var postalCode: ZipDto
+
     private lateinit var clickToSendValueFragment: ClickToSendValueFragment
     private lateinit var retrofit: Retrofit
     private var isClicked = false
 
-    private var mapView: MapView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            zipCode = it.getString(ZIP_CODE_BUNDLE)
-        }
+
         retrofit = getRetrofitFrag()
     }
-//    var zipInfo: String = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -89,12 +88,25 @@ class InputZipCode : Fragment() {
 
             if(responseApi.isSuccessful && responseApi.body() != null){
                 Log.i("response.body", responseApi.body().toString())
-                val markerOptions = MarkerOptions().position(
-                    LatLng(
-                    responseApi.body()!!.latitude, responseApi.body()!!.longitude
-                )
-                )
-                mapView?.googleMap?.addMarker(markerOptions)
+                activity?.runOnUiThread {
+                    val markerOptions = MarkerOptions().position(
+                        LatLng(
+                            responseApi.body()!!.latitude, responseApi.body()!!.longitude
+                        )
+                    )
+                    val addMarker = MapViewHelper.googleMapObj?.addMarker(markerOptions)
+                    MapViewHelper.googleMapObj?.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            responseApi.body()!!.latitude, responseApi.body()!!.longitude
+                        ), 10f
+                    ))
+
+                    Log.i("response.marker", addMarker.toString())
+                }
+
+
+
+
                 clickToSendValueFragment.pushToSendToActivity(responseApi.body()!!, isClicked)
             }else{
                 Log.i("response.body", "NotWorks")
@@ -118,21 +130,6 @@ class InputZipCode : Fragment() {
             .addConverterFactory(GsonConverterFactory.create())
             .build() 
     }
-
-
-
-    companion object {
-        private const val ZIP_CODE_BUNDLE = "507"
-
-        @JvmStatic
-        fun newInstance(zipCode: String) =
-            InputZipCode().apply {
-                arguments = Bundle().apply {
-                    putString(ZIP_CODE_BUNDLE, zipCode)
-                }
-            }
-    }
-
 
 }
 
