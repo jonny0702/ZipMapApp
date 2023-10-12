@@ -15,11 +15,17 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 
-class MapViewHelper(val activity: MainActivity, fusedLocation: FusedLocationProviderClient, lastLocation: Location?): DefaultLifecycleObserver {
+class MapViewHelper(
+    val activity: MainActivity,
+    fusedLocation: FusedLocationProviderClient,
+    lastLocation: Location?): DefaultLifecycleObserver {
+
+    companion object{
+         var googleMapObj: GoogleMap? = null
+    }
 
     val root  = View.inflate(activity,  R.layout.activity_main, null)
     var mapView: MapView? = null
-    var googleMapObj: GoogleMap? = null
     var lastLoc: Location? = lastLocation
 
     val mapFragment =
@@ -51,7 +57,7 @@ class MapViewHelper(val activity: MainActivity, fusedLocation: FusedLocationProv
             if(location != null){
                 lastLoc = location
                 val currentLatLong = LatLng(location.latitude, location.longitude)
-                googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 20f))
+                googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 15f))
             }
         }
     }
