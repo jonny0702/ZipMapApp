@@ -32,7 +32,6 @@ class MainActivity() : AppCompatActivity(), ClickToSendValueFragment, GoogleMap.
     //State Listener
     private var clickedStateButton = false
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -49,9 +48,7 @@ class MainActivity() : AppCompatActivity(), ClickToSendValueFragment, GoogleMap.
             add(R.id.input_fragment_container, inputFragment)
             setReorderingAllowed(true)
         }
-
     }
-
 
     override fun pushToSendToActivity (value: ZipCodeDao, isClicked: Boolean){
         clickedStateButton = isClicked
@@ -62,16 +59,13 @@ class MainActivity() : AppCompatActivity(), ClickToSendValueFragment, GoogleMap.
     }
 
 
-
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         const val LOCATION_REQUEST_CODE = 1
         const val BASE_URL = "http://192.168.0.13:8000/"
         private const val DEFAULT_ZOOM = 15f
         private const val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
-
     }
-
 
     override fun onMarkerClick(p0: Marker) = false
 
