@@ -16,6 +16,8 @@ import com.example.zipmap.ApiService.ZipCodeDao
 import com.example.zipmap.ApiService.ZipDto
 import com.example.zipmap.helper.MapView
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,11 +31,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 class InputZipCode : Fragment() {
 
     private var zipCode: String? = null
-    private  val responseObj: ZipCodeDao? = null
-    private lateinit var postalCode: ZipDto
+//    private  val responseObj: ZipCodeDao? = null
+//    private lateinit var postalCode: ZipDto
     private lateinit var clickToSendValueFragment: ClickToSendValueFragment
     private lateinit var retrofit: Retrofit
     private var isClicked = false
+
+    private var mapView: MapView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -41,7 +45,7 @@ class InputZipCode : Fragment() {
         }
         retrofit = getRetrofitFrag()
     }
-    var zipInfo: String = ""
+//    var zipInfo: String = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -85,6 +89,12 @@ class InputZipCode : Fragment() {
 
             if(responseApi.isSuccessful && responseApi.body() != null){
                 Log.i("response.body", responseApi.body().toString())
+                val markerOptions = MarkerOptions().position(
+                    LatLng(
+                    responseApi.body()!!.latitude, responseApi.body()!!.longitude
+                )
+                )
+                mapView?.googleMap?.addMarker(markerOptions)
                 clickToSendValueFragment.pushToSendToActivity(responseApi.body()!!, isClicked)
             }else{
                 Log.i("response.body", "NotWorks")
