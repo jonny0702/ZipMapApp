@@ -98,7 +98,7 @@ class InputZipCode(
                     MapViewHelper.googleMapObj?.animateCamera(CameraUpdateFactory.newLatLngZoom(
                         LatLng(
                             responseApi.body()!!.latitude, responseApi.body()!!.longitude
-                        ), 10f
+                        ), 14f
                     ))
 
                     Log.i("response.marker", addMarker.toString())
